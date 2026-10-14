@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Is de baby al geboren?</title>
+<meta name="description" content="Het antwoord op de vraag die iedereen stelt.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍼</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,800&family=Nunito:wght@400;600&display=swap" rel="stylesheet">
+
+<script>
+/* ============================================================
+   PAS ENKEL DIT BLOK AAN
+   ------------------------------------------------------------
+   ANTWOORD:      "nee" of "ja"
+   NAAM:          naam van de baby, of "" om (nog) niets te tonen
+   GEBOORTEDATUM: optioneel, bv. "2026-10-16", of ""
+   ============================================================ */
+const ANTWOORD      = "nee";
+const NAAM          = "";
+const GEBOORTEDATUM = "";
+/* ============================================================ */
+</script>
+
+<style>
+  :root {
+    --bg: #fbf5ec;
+    --ink: #2b2420;
+    --muted: #7a6d64;
+    --accent: #e0765b;
+    --yes: #3f9b6b;
+    --card: #fffaf3;
+    --line: #eadfd1;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Nunito", system-ui, sans-serif;
+    display: grid;
+    place-items: center;
+    padding: 24px 16px;
+    overflow-x: hidden;
+  }
+  main { text-align: center; max-width: 560px; width: 100%; }
+  .vraag {
+    font-size: clamp(1.1rem, 4vw, 1.4rem);
+    color: var(--muted);
+    letter-spacing: .01em;
+  }
+  .antwoord {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 800;
+    font-size: clamp(7rem, 34vw, 13rem);
+    line-height: 1;
+    margin: 12px 0 8px;
+    color: var(--accent);
+    display: inline-block;
+    animation: wiebel 4s ease-in-out infinite;
+    transform-origin: 50% 90%;
+  }
+  .ja .antwoord { color: var(--yes); animation: hup 1.2s ease-in-out infinite; }
+  @keyframes wiebel {
+    0%, 100% { transform: rotate(-2deg); }
+    50% { transform: rotate(2deg); }
+  }
+  @keyframes hup {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-8px) scale(1.04); }
+  }
+  .teller {
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+  .grap {
+    margin-top: 18px;
+    color: var(--muted);
+    min-height: 1.5em;
+    transition: opacity .4s;
+  }
+  .belofte {
+    margin: 36px auto 0;
+    padding: 14px 18px;
+    border: 1px dashed var(--line);
+    border-radius: 14px;
+    background: var(--card);
+    color: var(--muted);
+    font-size: .95rem;
+    max-width: 380px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .antwoord { animation: none !important; }
+  }
+  canvas { position: fixed; inset: 0; pointer-events: none; }
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<main>
+  <p class="vraag">Is de baby al geboren?</p>
+  <div class="antwoord" id="antwoord">Nee.</div>
+  <p class="teller" id="teller"></p>
+  <p class="grap" id="grap"></p>
+  <p class="belofte" id="belofte">Zodra er nieuws is, laten wij het jullie weten. Beloofd. 🤞</p>
+</main>
+
+<script>
+(function () {
+  const isJa = String(ANTWOORD).trim().toLowerCase() === "ja";
+  const $ = (id) => document.getElementById(id);
+  const datum = (s) => { const d = new Date(s + "T00:00:00"); return isNaN(d) ? null : d; };
+  const fmt = (d) => d.toLocaleDateString("nl-BE", { day: "numeric", month: "long" });
+
+  if (isJa) {
+    document.body.classList.add("ja");
+    document.title = "Ja! De baby is er 🎉";
+    $("antwoord").textContent = "Ja!";
+    const geb = datum(GEBOORTEDATUM);
+    $("teller").textContent = NAAM
+      ? `Welkom op de wereld, ${NAAM}!`
+      : "De baby is er. Iedereen is moe maar blij.";
+    $("grap").textContent = geb ? `Geboren op ${fmt(geb)}.` : "";
+    $("belofte").textContent = "Bedankt voor jullie geduld (en alle berichtjes). We laten snel meer van ons horen. 💛";
+    confetti();
+    return;
+  }
+
+  $("grap").textContent = "Je mag deze pagina gerust vernieuwen. Het helpt niet, maar toch.";
+
+  function confetti() {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const c = $("confetti"), ctx = c.getContext("2d");
+    const kleuren = ["#e0765b", "#3f9b6b", "#f2c14e", "#7aa6e0", "#f4a6c0"];
+    let w, h, deeltjes = [];
+    const resize = () => { w = c.width = innerWidth; h = c.height = innerHeight; };
+    resize(); addEventListener("resize", resize);
+    const nieuw = (top) => ({
+      x: Math.random() * w, y: top ? -20 : Math.random() * h,
+      r: 4 + Math.random() * 6, vy: 1 + Math.random() * 2.5,
+      vx: -1 + Math.random() * 2, rot: Math.random() * 6, vr: -.1 + Math.random() * .2,
+      kleur: kleuren[Math.floor(Math.random() * kleuren.length)]
+    });
+    for (let k = 0; k < 140; k++) deeltjes.push(nieuw(false));
+    const start = performance.now();
+    (function tick(t) {
+      ctx.clearRect(0, 0, w, h);
+      const doorgaan = t - start < 9000;
+      deeltjes.forEach((p, k) => {
+        p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+        if (p.y > h + 20) { if (doorgaan) deeltjes[k] = nieuw(true); else p.dood = true; }
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+        ctx.fillStyle = p.kleur; ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * .6);
+        ctx.restore();
+      });
+      deeltjes = deeltjes.filter((p) => !p.dood);
+      if (deeltjes.length) requestAnimationFrame(tick);
+    })(start);
+  }
+})();
+</script>
+</body>
+</html>
